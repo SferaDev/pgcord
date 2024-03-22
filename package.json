@@ -1,0 +1,23 @@
+{
+  "name": "pgcord",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@xata.io/client": "0.0.0-next.v34f1d64a4f4c1ffd896bbb285ab38efd8315b259",
+    "kysely": "^0.27.3",
+    "pg": "^8.11.3",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.4",
+    "prettier": "^3.2.5",
+    "vitest": "^1.4.0"
+  }
+}
