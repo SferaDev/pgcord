@@ -1,11 +1,13 @@
 import { z, ZodIntersection } from 'zod';
 import qs from 'qs';
+import { CompiledQuery } from 'kysely';
 
 type BaseSchema = z.ZodType<{}>;
 
 type ProcedureResult<Response> = {
   statusCode: number;
   response: Response;
+  query: CompiledQuery<any> | null;
 };
 
 class Procedure<InputSchema extends BaseSchema> {
@@ -116,13 +118,13 @@ export const t = {
     return new Router({
       routerContext: z.object({}),
       handler: () => ({}),
-      errorHandler: (error) => ({ statusCode: 500, response: { error: error.message } })
+      errorHandler: (error) => ({ statusCode: 500, response: { error: error.message }, query: null })
     });
   },
   get procedure() {
     return new Procedure({
       inputSchema: z.object({}),
-      handler: async () => ({ statusCode: 200, response: {} })
+      handler: async () => ({ statusCode: 200, response: {}, query: null })
     });
   }
 };

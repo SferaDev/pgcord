@@ -26,5 +26,5 @@ export const getRecord = ({ db }: OperationContext) =>
 
       const query = statement.compile();
       const { rows } = await db.executeQuery(query);
-      return { statusCode: 200, response: rows[0] ?? {} };
+      return { statusCode: 200, response: rows[0] ?? {}, query };
     });

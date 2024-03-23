@@ -24,5 +24,5 @@ export const insertRecord = ({ db }: OperationContext) =>
 
       const query = statement.compile();
       const { rows } = await db.executeQuery(query);
-      return { statusCode: 201, response: rows[0] ?? {} };
+      return { statusCode: 201, response: rows[0] ?? {}, query };
     });
