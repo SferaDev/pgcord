@@ -9,7 +9,7 @@ beforeAll(async () => {
   await hooks.beforeAll();
 
   await appRouter.execute(
-    'POST /db/{database}:{branch}/tables/{table}/data',
+    'POST /tables/{table}/data',
     { db: getClient({ host: 'xata.sh', workspace, region, database, branch, apiKey }) },
     { pathParams: { table: 'users' }, body: { xata_id: '1', name: 'Alice', age: 30 } }
   );
@@ -22,9 +22,9 @@ afterAll(async () => {
 describe('getRecord', () => {
   const getRecord = (table: string, id: string, columns: string[] | undefined) =>
     appRouter.execute(
-      'GET /db/{database}:${branch}/tables/{table}/data/{id}',
+      'GET /tables/{table}/data/{id}',
       { db: getClient({ host: 'xata.sh', workspace, region, database, branch, apiKey }) },
-      { pathParams: { table, id, columns } }
+      { pathParams: { table, id }, queryParams: { columns } }
     );
 
   test('gets a record', async () => {

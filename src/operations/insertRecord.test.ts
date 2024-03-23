@@ -16,9 +16,9 @@ afterAll(async () => {
 describe('insertRecord', () => {
   const insertRecord = (table: string, columns: string[] | undefined, body: Record<string, unknown>) =>
     appRouter.execute(
-      'POST /db/{database}:{branch}/tables/{table}/data',
+      'POST /tables/{table}/data',
       { db: getClient({ host: 'xata.sh', workspace, region, database, branch, apiKey }) },
-      { pathParams: { table, columns }, body }
+      { pathParams: { table }, queryParams: { columns }, body }
     );
 
   test('inserts a record', async () => {

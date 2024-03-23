@@ -8,7 +8,8 @@ export const insertRecord = ({ db }: OperationContext) =>
   t.procedure
     .input(
       z.object({
-        pathParams: z.object({ table: z.string(), columns: StringArray.optional() }),
+        pathParams: z.object({ table: z.string() }),
+        queryParams: z.object({ columns: StringArray.optional() }).optional(),
         body: z
           .unknown()
           .refine((input) => isObject(input), { message: 'Body must be an object' })
@@ -17,8 +18,8 @@ export const insertRecord = ({ db }: OperationContext) =>
     )
     .handler(async ({ input }) => {
       let statement = db.insertInto(input.pathParams.table).values(input.body);
-      if (input.pathParams.columns) {
-        statement = statement.returning(input.pathParams.columns) as typeof statement;
+      if (input.queryParams?.columns) {
+        statement = statement.returning(input.queryParams.columns) as typeof statement;
       }
 
       const query = statement.compile();

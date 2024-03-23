@@ -7,7 +7,8 @@ export const getRecord = ({ db }: OperationContext) =>
   t.procedure
     .input(
       z.object({
-        pathParams: z.object({ table: z.string(), id: RecordIdentifier, columns: StringArray.optional() })
+        pathParams: z.object({ table: z.string(), id: RecordIdentifier }),
+        queryParams: z.object({ columns: StringArray.optional() }).optional()
       })
     )
     .handler(async ({ input }) => {
@@ -17,8 +18,8 @@ export const getRecord = ({ db }: OperationContext) =>
         statement = statement.where(column, '=', id);
       }
 
-      if (input.pathParams.columns) {
-        statement = statement.select(input.pathParams.columns);
+      if (input.queryParams?.columns) {
+        statement = statement.select(input.queryParams.columns);
       } else {
         statement = statement.selectAll();
       }

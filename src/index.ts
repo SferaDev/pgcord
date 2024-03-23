@@ -14,6 +14,6 @@ export const appRouter = t.router
     return { statusCode: 500, response: { error: error.message } };
   })
   .build(({ ctx }) => ({
-    'POST /db/{database}:{branch}/tables/{table}/data': insertRecord(ctx),
-    'GET /db/{database}:${branch}/tables/{table}/data/{id}': getRecord(ctx)
+    'POST /tables/{table}/data': insertRecord(ctx),
+    'GET /tables/{table}/data/{id}': getRecord(ctx)
   }));
