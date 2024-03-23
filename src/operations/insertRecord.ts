@@ -1,10 +1,10 @@
 import { z } from 'zod';
-import { getClient } from '../utils/db';
+import { StringArray } from '../schemas';
 import { isObject } from '../utils/lang';
 import { t } from '../utils/router';
-import { StringArray, Context } from '../schemas';
+import { OperationContext } from '../utils/types';
 
-export const insertRecord = (ctx: Context) =>
+export const insertRecord = ({ db }: OperationContext) =>
   t.procedure
     .input(
       z.object({
@@ -16,7 +16,6 @@ export const insertRecord = (ctx: Context) =>
       })
     )
     .handler(async ({ input }) => {
-      const db = getClient(ctx);
       let statement = db.insertInto(input.pathParams.table).values(input.body);
       if (input.pathParams.columns) {
         statement = statement.returning(input.pathParams.columns) as typeof statement;

@@ -1,11 +1,5 @@
 import { z } from 'zod';
 
-export type Context = {
-  routeParams: z.infer<typeof RouteParams>;
-  pathParams: z.infer<typeof DBBranchParams>;
-  headers: { Authorization: string };
-};
-
 export const RouteParams = z.object({
   host: z.string(),
   workspace: z.string(),

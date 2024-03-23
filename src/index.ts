@@ -1,11 +1,11 @@
 import { z } from 'zod';
-import { t } from './utils/router';
-import { DBBranchParams, headers, RouteParams } from './schemas';
-import { insertRecord } from './operations/insertRecord';
 import { getRecord } from './operations/getRecord';
+import { insertRecord } from './operations/insertRecord';
+import { t } from './utils/router';
+import { KyselySchema } from './utils/types';
 
 export const appRouter = t.router
-  .input(z.object({ routeParams: RouteParams, pathParams: DBBranchParams, headers }))
+  .input(z.object({ db: KyselySchema }))
   .onError((error) => {
     if (error instanceof z.ZodError) {
       return { statusCode: 400, response: { error: error.errors.map((item) => item.message).join(', ') } };

@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import { appRouter } from '../index';
+import { getClient } from '../utils/db';
 import { setupTest } from '../utils/test';
 
 const { hooks, workspace, region, apiKey, database, branch } = setupTest();
@@ -16,11 +17,7 @@ describe('insertRecord', () => {
   const insertRecord = (table: string, columns: string[] | undefined, body: Record<string, unknown>) =>
     appRouter.execute(
       'POST /db/{database}:{branch}/tables/{table}/data',
-      {
-        routeParams: { host: 'xata.sh', workspace, region },
-        pathParams: { database, branch },
-        headers: { Authorization: `Bearer ${apiKey}` }
-      },
+      { db: getClient({ host: 'xata.sh', workspace, region, database, branch, apiKey }) },
       { pathParams: { table, columns }, body }
     );
 

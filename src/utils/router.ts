@@ -27,28 +27,28 @@ class Procedure<InputSchema extends BaseSchema> {
   }
 }
 
-class Router<InputSchema extends BaseSchema = BaseSchema, Routes extends Record<string, Procedure<any>> = {}> {
+class Router<RouterContext extends BaseSchema = BaseSchema, Routes extends Record<string, Procedure<any>> = {}> {
   constructor(
     public meta: {
-      inputSchema: BaseSchema;
+      routerContext: BaseSchema;
       handler: (options: { ctx: z.input<BaseSchema> }) => Record<string, Procedure<any>>;
       errorHandler: (error: Error) => ProcedureResult<any>;
     }
   ) {}
 
-  input<T extends BaseSchema>(inputSchema: T) {
+  input<T extends BaseSchema>(routerContext: T) {
     return new Router<T, Routes>({
       ...this.meta,
-      inputSchema: z.intersection(this.meta.inputSchema, inputSchema)
+      routerContext: z.intersection(this.meta.routerContext, routerContext)
     });
   }
 
-  build<T extends Record<string, Procedure<any>>>(handler: (options: { ctx: z.input<InputSchema> }) => T) {
-    return new Router<InputSchema, T>({ ...this.meta, handler });
+  build<T extends Record<string, Procedure<any>>>(handler: (options: { ctx: z.input<RouterContext> }) => T) {
+    return new Router<RouterContext, T>({ ...this.meta, handler });
   }
 
   onError(errorHandler: (error: Error) => ProcedureResult<any>) {
-    return new Router<InputSchema, Routes>({
+    return new Router<RouterContext, Routes>({
       ...this.meta,
       errorHandler
     });
@@ -56,7 +56,7 @@ class Router<InputSchema extends BaseSchema = BaseSchema, Routes extends Record<
 
   async execute<T extends keyof Routes>(
     route: T,
-    ctx: z.input<InputSchema>,
+    ctx: z.input<RouterContext>,
     params: z.input<Routes[T]['meta']['inputSchema']>
   ): Promise<ProcedureResult<any>> {
     try {
@@ -75,7 +75,7 @@ class Router<InputSchema extends BaseSchema = BaseSchema, Routes extends Record<
 export const t = {
   get router() {
     return new Router({
-      inputSchema: z.object({}),
+      routerContext: z.object({}),
       handler: () => ({}),
       errorHandler: (error) => ({ statusCode: 500, response: { error: error.message } })
     });

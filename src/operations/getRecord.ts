@@ -1,10 +1,9 @@
 import { z } from 'zod';
-import { getClient } from '../utils/db';
-import { isObject } from '../utils/lang';
+import { RecordIdentifier, StringArray } from '../schemas';
 import { t } from '../utils/router';
-import { StringArray, Context, RecordIdentifier } from '../schemas';
+import { OperationContext } from '../utils/types';
 
-export const getRecord = (ctx: Context) =>
+export const getRecord = ({ db }: OperationContext) =>
   t.procedure
     .input(
       z.object({
@@ -12,7 +11,6 @@ export const getRecord = (ctx: Context) =>
       })
     )
     .handler(async ({ input }) => {
-      const db = getClient(ctx);
       let statement = db.selectFrom(input.pathParams.table);
 
       for (const { column, id } of input.pathParams.id) {
