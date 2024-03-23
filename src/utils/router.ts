@@ -1,4 +1,5 @@
 import { z, ZodIntersection } from 'zod';
+import qs from 'qs';
 
 type BaseSchema = z.ZodType<{}>;
 
@@ -27,11 +28,14 @@ class Procedure<InputSchema extends BaseSchema> {
   }
 }
 
-class Router<RouterContext extends BaseSchema = BaseSchema, Routes extends Record<string, Procedure<any>> = {}> {
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+type ProcedureName = `${HttpMethod} ${string}` | (string & {});
+
+class Router<RouterContext extends BaseSchema = BaseSchema, Routes extends Record<ProcedureName, Procedure<any>> = {}> {
   constructor(
     public meta: {
       routerContext: BaseSchema;
-      handler: (options: { ctx: z.input<BaseSchema> }) => Record<string, Procedure<any>>;
+      handler: (options: { ctx: z.input<BaseSchema> }) => Record<ProcedureName, Procedure<any>>;
       errorHandler: (error: Error) => ProcedureResult<any>;
     }
   ) {}
@@ -43,7 +47,7 @@ class Router<RouterContext extends BaseSchema = BaseSchema, Routes extends Recor
     });
   }
 
-  build<T extends Record<string, Procedure<any>>>(handler: (options: { ctx: z.input<RouterContext> }) => T) {
+  build<T extends Record<ProcedureName, Procedure<any>>>(handler: (options: { ctx: z.input<RouterContext> }) => T) {
     return new Router<RouterContext, T>({ ...this.meta, handler });
   }
 
@@ -57,7 +61,7 @@ class Router<RouterContext extends BaseSchema = BaseSchema, Routes extends Recor
   async execute<T extends keyof Routes>(
     route: T,
     ctx: z.input<RouterContext>,
-    params: z.input<Routes[T]['meta']['inputSchema']>
+    params: T extends string ? z.input<Routes[T]['meta']['inputSchema']> : never
   ): Promise<ProcedureResult<any>> {
     try {
       const routes = this.meta.handler({ ctx });
@@ -70,7 +74,42 @@ class Router<RouterContext extends BaseSchema = BaseSchema, Routes extends Recor
       return this.meta.errorHandler(error);
     }
   }
+
+  async match(ctx: z.input<RouterContext>, request: Request): Promise<ProcedureResult<any>> {
+    const url = new URL(request.url);
+
+    const routes = this.meta.handler({ ctx });
+    const result = Object.entries(routes).reduce(
+      (acc, [key, value]) => {
+        if (acc) return acc;
+        const [method, path] = key.split(' ');
+        if (method.toUpperCase() !== request.method.toUpperCase()) return null;
+
+        const regex = new RegExp(path.replace(/{([^}]+)}/g, (_, name) => `(?<${name}>[^/]+)`).replace(/\//g, '\\/'));
+        const match = url.pathname.match(regex);
+        if (match) {
+          const pathParams = Object.fromEntries(
+            Object.entries(match.groups ?? {}).map(([key, value]) => [key, value ?? ''])
+          );
+          return { name: key, procedure: value, pathParams };
+        }
+
+        return null;
+      },
+      null as MatchResult | null
+    );
+    if (!result) throw new Error(`Route ${request.method} ${url.pathname} not found`);
+
+    const input = result.procedure.meta.inputSchema.parse({
+      pathParams: result.pathParams,
+      queryParams: qs.parse(url.search, { ignoreQueryPrefix: true })
+    });
+
+    return await result.procedure.meta.handler({ input });
+  }
 }
+
+type MatchResult = { name: string; procedure: Procedure<any>; pathParams: Record<string, string> };
 
 export const t = {
   get router() {
