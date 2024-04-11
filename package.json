@@ -10,14 +10,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@xata.io/client": "0.0.0-next.v34f1d64a4f4c1ffd896bbb285ab38efd8315b259",
+    "@xata.io/client": "0.0.0-next.vb0a85c9143c13dd5082810db994a5fede59bb0a4",
     "kysely": "^0.27.3",
-    "pg": "^8.11.3",
+    "pg": "^8.11.5",
     "qs": "^6.12.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@types/pg": "^8.11.4",
+    "@types/pg": "^8.11.5",
     "@types/qs": "^6.9.14",
     "prettier": "^3.2.5",
     "vitest": "^1.4.0"
