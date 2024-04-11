@@ -10,7 +10,10 @@ beforeAll(async () => {
 
   await appRouter.execute(
     'POST /tables/{table}/data',
-    { db: getClient({ host: 'xata.sh', workspace, region, database, branch, apiKey }) },
+    {
+      db: getClient({ host: 'xata.sh', workspace, region, database, branch, apiKey }),
+      meta: { workspace, region, database, branch }
+    },
     { pathParams: { table: 'users' }, body: { xata_id: '1', name: 'Alice', age: 30 } }
   );
 });
@@ -23,7 +26,10 @@ describe('getRecord', () => {
   const getRecord = (table: string, id: string, columns: string[] | undefined) =>
     appRouter.execute(
       'GET /tables/{table}/data/{id}',
-      { db: getClient({ host: 'xata.sh', workspace, region, database, branch, apiKey }) },
+      {
+        db: getClient({ host: 'xata.sh', workspace, region, database, branch, apiKey }),
+        meta: { workspace, region, database, branch }
+      },
       { pathParams: { table, id }, queryParams: { columns } }
     );
 

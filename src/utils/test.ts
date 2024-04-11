@@ -1,4 +1,7 @@
 import { XataApiClient } from '@xata.io/client';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 async function waitForMigrationToFinish(
   api: XataApiClient,

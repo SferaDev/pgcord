@@ -17,7 +17,10 @@ describe('insertRecord', () => {
   const insertRecord = (table: string, columns: string[] | undefined, body: Record<string, unknown>) =>
     appRouter.execute(
       'POST /tables/{table}/data',
-      { db: getClient({ host: 'xata.sh', workspace, region, database, branch, apiKey }) },
+      {
+        db: getClient({ host: 'xata.sh', workspace, region, database, branch, apiKey }),
+        meta: { workspace, region, database, branch }
+      },
       { pathParams: { table }, queryParams: { columns }, body }
     );
 
