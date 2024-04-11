@@ -15,7 +15,12 @@ export const queryTable = ({ db, meta }: OperationContext) =>
           .object({
             filter: z.object({}).optional(),
             sort: z.object({}).optional(),
-            page: z.object({}).optional(),
+            pagination: z
+              .object({
+                limit: z.number().optional(),
+                offset: z.number().optional()
+              })
+              .optional(),
             columns: StringArray.optional()
           })
           .optional()
@@ -24,10 +29,11 @@ export const queryTable = ({ db, meta }: OperationContext) =>
     .handler(async ({ input }) => {
       const { workspace, region, database, branch } = meta;
       const { table } = input.pathParams;
-      const { filter, sort, page, columns } = input.body ?? {};
+      const { filter, sort, pagination, columns } = input.body ?? {};
 
-      const options = compactRecord({ filter, sort, page, columns });
-      const cursor = Cursor.from({ workspace, region, database, branch, table, ...options }).toString();
+      const cursor = Cursor.from(
+        compactRecord({ workspace, region, database, branch, table, filter, sort, pagination, columns })
+      ).toString();
 
       let statement = db.selectFrom(input.pathParams.table);
 
@@ -37,10 +43,16 @@ export const queryTable = ({ db, meta }: OperationContext) =>
         statement = statement.selectAll();
       }
 
-      const query = statement.compile();
-      console.log(query);
+      if (pagination?.limit) {
+        statement = statement.limit(pagination.limit);
+      }
 
+      if (pagination?.offset) {
+        statement = statement.offset(pagination.offset);
+      }
+
+      const query = statement.compile();
       const { rows } = await db.executeQuery(query);
 
-      return { statusCode: 200, response: { records: rows, meta: { page: { cursor } } }, query };
+      return { statusCode: 200, response: { records: rows, meta: { cursor } }, query };
     });
